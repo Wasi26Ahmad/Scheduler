@@ -1,0 +1,50 @@
+# infsched configuration
+version: 1
+
+server:
+  grpc_port: 50051
+  ops_port: 9090
+  unix_socket: /run/infsched/infsched.sock
+  graceful_drain_timeout_ms: 5000
+
+policy:
+  max_batch_wait_ms: 2
+  safety_margin_ms: 1
+  max_queue_depth: 5000
+  enable_overflow_borrowing: true
+
+tenants:
+  - name: tenant_vip
+    tokens_per_sec: 500.0
+    burst_capacity: 1000.0
+  - name: default
+    tokens_per_sec: 100.0
+    burst_capacity: 200.0
+
+models:
+  - name: resnet50
+    backend: onnx
+    path: /models/resnet50.onnx
+    min_physical_cores: 1
+    max_physical_cores: 2
+    max_batch_size: 16
+    working_set_bytes_per_sample: 524288 # 512 KiB
+    memory_limit_bytes: 1073741824       # 1 GiB
+
+  - name: bert-base
+    backend: onnx
+    path: /models/bert-base.onnx
+    min_physical_cores: 1
+    max_physical_cores: 2
+    max_batch_size: 8
+    working_set_bytes_per_sample: 1048576 # 1 MiB
+    memory_limit_bytes: 2147483648        # 2 GiB
+
+  - name: llama-3-8b
+    backend: gguf
+    path: /models/llama-3-8b-q4.gguf
+    min_physical_cores: 2
+    max_physical_cores: 4
+    max_batch_size: 4
+    working_set_bytes_per_sample: 4194304 # 4 MiB
+    memory_limit_bytes: 6442450944        # 6 GiB

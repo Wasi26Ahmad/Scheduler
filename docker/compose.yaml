@@ -1,0 +1,30 @@
+services:
+  infsched:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: infsched:latest
+    restart: unless-stopped
+    stop_grace_period: 30s
+    cpuset: "0-7"
+    mem_limit: 12g
+    shm_size: 2g
+    cap_add:
+      - IPC_LOCK
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "50051:50051"
+      - "9090:9090"
+    volumes:
+      - ./models:/models:ro
+      - ../configs/infsched.yaml:/etc/infsched/infsched.yaml:ro
+      - /run/infsched:/run/infsched
+    healthcheck:
+      test: ["CMD", "infsched-ctl", "ready", "--port", "9090"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 30s

@@ -1,0 +1,23 @@
+name: Performance Benchmarks
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # Nightly
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Benchmarks
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --target infsched-bench infsched-sim
+
+      - name: Run Live Benchmark
+        run: ./build/bench/infsched-bench
+
+      - name: Run Policy Simulation Comparison
+        run: ./build/src/sim/infsched-sim 5000

@@ -1,0 +1,20 @@
+name: Chaos Resilience Testing
+
+on:
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 2 * * *' # Nightly at 2am
+  workflow_dispatch:
+
+jobs:
+  chaos-resilience:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and Run Chaos Tests
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --target test_chaos
+          ./build/tests/test_chaos
